@@ -272,9 +272,7 @@ public class Sim extends CordovaPlugin {
   }
 
   private void requestReadPermission() {
-    requestPermission(Manifest.permission.READ_PHONE_STATE, 12345);
-    requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, 12346);
-
+    requestPermission(Manifest.permission.READ_PHONE_STATE);
   }
 
   private boolean simPermissionGranted(String type) {
@@ -284,10 +282,10 @@ public class Sim extends CordovaPlugin {
     return cordova.hasPermission(type);
   }
 
-  private void requestPermission(String type, int code) {
+  private void requestPermission(String type) {
     LOG.i(LOG_TAG, "requestPermission");
     if (!simPermissionGranted(type)) {
-      cordova.requestPermission(this, code, type);
+      cordova.requestPermission(this, 12345, type);
     } else {
       this.callback.success();
     }
