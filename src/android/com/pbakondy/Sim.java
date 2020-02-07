@@ -208,7 +208,7 @@ public class Sim extends CordovaPlugin {
               }
             }
           }
-        } catch(JSONException e) {
+        } catch(Exception e) {
           e.printStackTrace();
         }
       }
