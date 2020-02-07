@@ -50,7 +50,7 @@ import android.telephony.CellInfo;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoWcdma;
 import android.telephony.CellLocation;
-import android.telephony.GsmCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 
 import java.util.List;
 
