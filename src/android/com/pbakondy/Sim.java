@@ -202,7 +202,8 @@ public class Sim extends CordovaPlugin {
                     CellInfoGsm cellInfoGsm = (CellInfoGsm) cellInfo;
                     CellIdentityGsm cellIdentity = cellInfoGsm.getCellIdentity();
                     lac = String.valueOf(cellIdentity.getLac());
-                    cid = String.valueOf(cellIdentity.getCid());
+                    CellIdentityGsm cellIdentity2 = cellInfoGsm.getCellIdentity();
+                    cid = String.valueOf(cellIdentity2.getCid());
                   }
                 }
               }
