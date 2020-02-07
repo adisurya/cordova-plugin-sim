@@ -45,6 +45,12 @@ import android.Manifest;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.CellIdentityGsm;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoWcdma;
+import android.telephony.CellLocation;
+import android.telephony.GsmCellLocation;
 
 import java.util.List;
 
@@ -115,7 +121,7 @@ public class Sim extends CordovaPlugin {
               }
 
               JSONObject simData = new JSONObject();
-
+ 
               simData.put("carrierName", carrierName.toString());
               simData.put("displayName", displayName.toString());
               simData.put("countryCode", countryIso);
@@ -176,12 +182,45 @@ public class Sim extends CordovaPlugin {
         mnc = simOperator.substring(3);
       }
 
+      String lac = "";
+      String cid = "";
+      if (simPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
+        try {
+          if (android.os.Build.VERSION.SDK_INT < 26) {
+            CellLocation cellLocation = manager.getCellLocation();
+            if (cellLocation instanceof GsmCellLocation) {
+              GsmCellLocation gsmCellLocation = (GsmCellLocation) cellLocation;
+              lac = String.valueOf(gsmCellLocation.getLac());
+              cid = String.valueOf(gsmCellLocation.getCid());
+            }
+          } else {
+            List<CellInfo> allCellInfo = manager.getAllCellInfo();
+            if (allCellInfo != null) {
+              for(CellInfo cellInfo : allCellInfo) {
+                if (!(cellInfo instanceof CellInfoWcdma)) {
+                  if (cellInfo instanceof CellInfoGsm) {
+                    CellInfoGsm cellInfoGsm = (CellInfoGsm) cellInfo;
+                    CellIdentityGsm cellIdentity = cellInfoGsm.getCellIdentity();
+                    lac = String.valueOf(cellIdentity.getLac());
+                    cid = String.valueOf(cellIdentity.getCid());
+                  }
+                }
+              }
+            }
+          }
+        } catch(JSONException e) {
+          e.printStackTrace();
+        }
+      }
+
       JSONObject result = new JSONObject();
 
       result.put("carrierName", carrierName);
       result.put("countryCode", countryCode);
       result.put("mcc", mcc);
       result.put("mnc", mnc);
+      result.put("lac", lac);
+      result.put("cid", cid);
 
       result.put("callState", callState);
       result.put("dataActivity", dataActivity);
@@ -228,12 +267,14 @@ public class Sim extends CordovaPlugin {
   }
 
   private void hasReadPermission() {
-    this.callback.sendPluginResult(new PluginResult(PluginResult.Status.OK,
-      simPermissionGranted(Manifest.permission.READ_PHONE_STATE)));
+    boolean granted = simPermissionGranted(Manifest.permission.READ_PHONE_STATE) && simPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION);
+    this.callback.sendPluginResult(new PluginResult(PluginResult.Status.OK, granted));
   }
 
   private void requestReadPermission() {
     requestPermission(Manifest.permission.READ_PHONE_STATE);
+    requestPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+
   }
 
   private boolean simPermissionGranted(String type) {
